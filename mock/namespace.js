@@ -1,7 +1,7 @@
 const Mock = require('mockjs')
 
 const data = Mock.mock({
-  'items|30': [{
+  'items|10': [{
     id: '@id',
     code: '@word(2, 10)',
     description: '@csentence(10, 20)'
