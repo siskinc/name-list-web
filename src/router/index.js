@@ -56,41 +56,6 @@ export const constantRoutes = [
   },
 
   {
-    path: '/example',
-    component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: 'Example', icon: 'el-icon-s-help' },
-    children: [
-      {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
-      }
-    ]
-  },
-
-  {
-    path: '/form',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'Form',
-        component: () => import('@/views/form/index'),
-        meta: { title: 'Form', icon: 'form' }
-      }
-    ]
-  },
-
-  {
     path: "/namespace",
     component: Layout,
     name: 'Namespace',
@@ -115,6 +80,20 @@ export const constantRoutes = [
         name:"ListType",
         component: () => import("@/views/list-type/index"),
         meta: {title:"名单类型", icon: 'form'}
+      }
+    ]
+  },
+
+  {
+    path: "/list-item",
+    component: Layout,
+    name: "ListItem",
+    children: [
+      {
+        path:"",
+        name:"ListItem",
+        component: () => import("@/views/list-item/index"),
+        meta: {title:"名单项", icon: 'form'}
       }
     ]
   },
