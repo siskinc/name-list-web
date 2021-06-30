@@ -19,7 +19,8 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="ID" width="200">
+      <el-table-column type="selection" width="55"> </el-table-column>
+      <el-table-column align="center" label="ID" width="200" fixed="left">
         <template slot-scope="scope">
           {{ scope.row.id }}
         </template>
@@ -32,6 +33,12 @@
       <el-table-column label="描述" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.description }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column fixed="right" label="操作" width="100">
+        <template>
+          <el-button type="text" size="small">查看</el-button>
+          <el-button type="text" size="small">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -84,13 +91,13 @@ export default {
       });
     },
     onSubmit() {
-        this.fetchData();
+      this.fetchData();
     },
     handleSizeChange() {
-        this.fetchData();
+      this.fetchData();
     },
     handleCurrentChange() {
-        this.fetchData();
+      this.fetchData();
     },
   },
 };
