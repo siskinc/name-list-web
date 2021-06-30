@@ -51,7 +51,7 @@ export const constantRoutes = [
       path: 'dashboard',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      meta: { title: '总览', icon: 'dashboard' }
     }]
   },
 
@@ -62,10 +62,10 @@ export const constantRoutes = [
     
     children: [
       {
-        path: "",
+        path: "namespace",
         name: "Namespace",
         component: () => import('@/views/namespace/index'),
-        meta: {title: '命名空间', icon: 'form'}
+        meta: {title: '命名空间', icon: 'el-icon-wallet'}
       }
     ]
   },
@@ -76,10 +76,10 @@ export const constantRoutes = [
     name: "ListType",
     children: [
       {
-        path:"",
+        path:"list-type",
         name:"ListType",
         component: () => import("@/views/list-type/index"),
-        meta: {title:"名单类型", icon: 'form'}
+        meta: {title:"名单类型", icon: 'el-icon-discount'}
       }
     ]
   },
@@ -90,10 +90,10 @@ export const constantRoutes = [
     name: "ListItem",
     children: [
       {
-        path:"",
+        path:"list-item",
         name:"ListItem",
         component: () => import("@/views/list-item/index"),
-        meta: {title:"名单项", icon: 'form'}
+        meta: {title:"名单项", icon: 'el-icon-price-tag'}
       }
     ]
   },
