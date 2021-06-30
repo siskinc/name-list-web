@@ -7,6 +7,9 @@
       <el-form-item label="编码">
         <el-input v-model="form.code" placeholder="编码" clearable />
       </el-form-item>
+      <el-form-item label="描述">
+        <el-input v-model="form.description" placeholder="描述" clearable />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">查询</el-button>
       </el-form-item>
