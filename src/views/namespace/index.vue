@@ -1,6 +1,7 @@
 <template>
   <div class="app-container">
     <el-form ref="form" :model="form" label-width="80px" :inline="true">
+      <el-button type="primary" @click="dialogFormVisible = !dialogFormVisible">新增命名空间</el-button>
       <el-form-item label="ID">
         <el-input v-model="form.id" placeholder="ID" clearable id="input_id" />
       </el-form-item>
@@ -10,9 +11,10 @@
       <el-form-item label="描述">
         <el-input v-model="form.description" placeholder="描述" clearable />
       </el-form-item>
-      <el-form-item>
+      <el-button-group>
         <el-button type="primary" @click="onSubmit">查询</el-button>
-      </el-form-item>
+        <el-button type="danger" icon="el-icon-delete"></el-button>
+      </el-button-group>
     </el-form>
     <el-table
       v-loading="listLoading"
@@ -57,6 +59,23 @@
       >
       </el-pagination>
     </div>
+
+    <el-dialog title="创建新的命名空间" :visible.sync="dialogFormVisible" center="true">
+      <el-form :model="create_form">
+        <el-form-item label="编码" :label-width="formLabelWidth">
+          <el-input v-model="create_form.code" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="描述" :label-width="formLabelWidth">
+          <el-input type="textarea" v-model="create_form.description" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormVisible = false"
+          >确 定</el-button
+        >
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -64,6 +83,8 @@
 import { getNamespaceList } from "@/api/namespace";
 
 export default {
+  components: {
+  },
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -80,6 +101,12 @@ export default {
       listLoading: true,
       form: {},
       currentPage4: 1,
+      dialogFormVisible: false,
+      create_form: {
+        code: "",
+        description: "",
+      },
+      formLabelWidth: "120px",
     };
   },
   created() {
