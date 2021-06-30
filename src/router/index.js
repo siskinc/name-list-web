@@ -93,7 +93,7 @@ export const constantRoutes = [
   {
     path: "/namespace",
     component: Layout,
-    name: 'NameList',
+    name: 'Namespace',
     
     children: [
       {
@@ -101,6 +101,20 @@ export const constantRoutes = [
         name: "Namespace",
         component: () => import('@/views/namespace/index'),
         meta: {title: '命名空间', icon: 'form'}
+      }
+    ]
+  },
+
+  {
+    path: "/list-type",
+    component: Layout,
+    name: "ListType",
+    children: [
+      {
+        path:"",
+        name:"ListType",
+        component: () => import("@/views/list-type/index"),
+        meta: {title:"名单类型", icon: 'form'}
       }
     ]
   },

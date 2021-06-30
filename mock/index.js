@@ -4,11 +4,13 @@ const { param2Obj } = require('./utils')
 const user = require('./user')
 const table = require('./table')
 const namespace = require('./namespace')
+const list_type = require('./list-type')
 
 const mocks = [
   ...user,
   ...table,
   ...namespace,
+  ...list_type,
 ]
 
 // for front mock
