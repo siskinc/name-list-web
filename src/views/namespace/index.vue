@@ -61,37 +61,19 @@
       >
       </el-pagination>
     </div>
-
-    <el-dialog
-      title="创建新的命名空间"
-      :visible.sync="dialogFormVisible"
-      center="true"
-    >
-      <el-form :model="create_form">
-        <el-form-item label="编码" :label-width="formLabelWidth">
-          <el-input v-model="create_form.code" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="描述" :label-width="formLabelWidth">
-          <el-input
-            type="textarea"
-            v-model="create_form.description"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="onSubmitWithCreate">确 定</el-button>
-      </div>
-    </el-dialog>
+    <create-namespace-dialog :visible.sync="dialogFormVisible"
+      @refreshList="onSubmit" ></create-namespace-dialog>
   </div>
 </template>
 
 <script>
 import { getNamespaceList, createNamespace } from "@/api/namespace";
+import CreateNamespaceDialog from "./create_dialog";
 
 export default {
-  components: {},
+  components: {
+    CreateNamespaceDialog,
+  },
   filters: {
   },
   data() {
@@ -102,10 +84,6 @@ export default {
       pageIndex: 1,
       pageSize: 10,
       dialogFormVisible: false,
-      create_form: {
-        code: "",
-        description: "",
-      },
       formLabelWidth: "120px",
       dataTotal: 0,
     };
