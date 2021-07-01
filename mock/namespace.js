@@ -16,10 +16,17 @@ module.exports = [
         const items = data.items
         return {
           code: 0,
-          data: {
-            total: items.length,
-            items: items
-          }
+          total: items.length,
+          data: items
+        }
+      }
+    },
+    {
+      url: '/api/namespace',
+      type: 'get',
+      response: config => {
+        return {
+          code: 0
         }
       }
     }
