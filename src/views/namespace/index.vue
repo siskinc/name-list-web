@@ -55,7 +55,7 @@
         :page-sizes="[10, 20, 30, 40, 50, 60, 70, 80, 90, 100]"
         :page-size="10"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="400"
+        :total="dataTotal"
       >
       </el-pagination>
     </div>
@@ -107,6 +107,7 @@ export default {
         description: "",
       },
       formLabelWidth: "120px",
+      dataTotal: 0
     };
   },
   created() {
@@ -116,7 +117,8 @@ export default {
     fetchData() {
       this.listLoading = true;
       getNamespaceList().then((response) => {
-        this.list = response.data.items;
+        this.list = response.data;
+        this.dataTotal = response.total;
         this.listLoading = false;
       });
     },

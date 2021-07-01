@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getNamespaceList(params) {
     return request({
-      url: '/api/namespace',
+      url: '/name-list/namespace/',
       method: 'get',
       params
     })
