@@ -115,8 +115,10 @@ export default {
       switch (this.dialog_type) {
         case "create":
           this.createNamespaceHandler();
+          break;
         case "update":
           this.updateNamespaceHandler();
+          break;
       }
     },
     createNamespaceHandler() {

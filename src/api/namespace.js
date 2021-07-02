@@ -23,3 +23,10 @@ export function updateNamespace(id, data) {
     data: data,
   })
 }
+
+export function deleteNamespace(id) {
+  return request({
+    url: '/name-list/namespace/' + id,
+    method: 'delete',
+  })
+}

@@ -45,6 +45,8 @@ service.interceptors.response.use(
   response => {
     const res = response.data
 
+    // console.log("res"+JSON.stringify(res));
+
     // if the custom code is not 0, it is judged as an error.
     if (res.code !== 0) {
       Message({

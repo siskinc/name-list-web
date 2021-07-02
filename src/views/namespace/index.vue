@@ -17,7 +17,7 @@
       </el-form-item>
       <el-button-group>
         <el-button type="primary" @click="onSubmit">查询</el-button>
-        <el-button type="danger" icon="el-icon-delete"></el-button>
+        <el-button type="danger" icon="el-icon-delete" @click="handleDeleteNamespace"></el-button>
       </el-button-group>
     </el-form>
     <el-table
@@ -28,6 +28,7 @@
       fit
       highlight-current-row
       @cell-dblclick="handleUpdateNamespace"
+      @selection-change="handleSelectChange"
     >
       <el-table-column type="selection" width="55"> </el-table-column>
       <el-table-column align="center" label="ID" width="200" fixed="left">
@@ -74,7 +75,7 @@
 </template>
 
 <script>
-import { getNamespaceList } from "@/api/namespace";
+import { getNamespaceList, deleteNamespace } from "@/api/namespace";
 import HandleNamespaceDialog from "./handle-dialog";
 
 export default {
@@ -94,6 +95,7 @@ export default {
       dialog_type: "",
       formLabelWidth: "120px",
       dataTotal: 0,
+      selected_rows: [],
     };
   },
   created() {
@@ -135,7 +137,6 @@ export default {
     handleUpdateNamespace(row) {
       this.select_data = row;
       this.dialog_type = "update";
-      console.log("fuck"+this.dialog_type)
       this.dialogFormVisible = true;
     },
     handleCreateNamespace() {
@@ -148,6 +149,20 @@ export default {
       this.select_data = row;
       this.dialog_type = "detail";
       this.dialogFormVisible = true;
+    },
+    handleDeleteNamespace() {
+      for (let i in this.selected_rows) {
+        let _id = this.selected_rows[i].id;
+        let code = this.selected_rows[i].code;
+        deleteNamespace(_id).then((response)=>{
+          if (response.code === 0) {
+            this.$message.success(`删除 "${code}" 成功`)
+          }
+        });
+      }
+    },
+    handleSelectChange(selected_rows) {
+      this.selected_rows = selected_rows;
     },
   },
 };
