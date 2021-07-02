@@ -48,7 +48,6 @@
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="handleDetailNamespace(scope.row)">查看</el-button>
           <el-button type="text" size="small" @click="handleUpdateNamespace(scope.row)">编辑</el-button>
         </template>
       </el-table-column>
@@ -142,12 +141,6 @@ export default {
     handleCreateNamespace() {
       this.select_data = {};
       this.dialog_type = "create";
-      this.dialogFormVisible = true;
-    },
-    handleDetailNamespace(row) {
-      console.log(row);
-      this.select_data = row;
-      this.dialog_type = "detail";
       this.dialogFormVisible = true;
     },
     handleDeleteNamespace() {

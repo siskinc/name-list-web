@@ -96,14 +96,6 @@ export default {
           this.disabled.description = false;
           this.show.submit = true;
           break;
-        case "detail":
-          this.title = "查看详情";
-          this.show.id = true;
-          this.disabled.id = true;
-          this.disabled.code = true;
-          this.disabled.description = true;
-          this.show.submit = false;
-          break;
         default:
           break;
       }
