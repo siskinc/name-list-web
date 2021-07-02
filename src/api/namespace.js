@@ -15,3 +15,11 @@ export function createNamespace(data) {
     data: data,
   })
 }
+
+export function updateNamespace(id, data) {
+  return request({
+    url: '/name-list/namespace/' + id,
+    method: 'patch',
+    data: data,
+  })
+}

@@ -1,11 +1,13 @@
 <template>
   <div class="app-container">
     <el-form ref="form" :model="form" label-width="80px" :inline="true">
-      <el-button type="primary" @click="dialogFormVisible = !dialogFormVisible"
+      <el-button
+        type="primary"
+        @click="handleCreateNamespace"
         >新增命名空间</el-button
       >
       <el-form-item label="ID">
-        <el-input v-model="form.id" placeholder="ID" clearable id="input_id" />
+        <el-input v-model="form.id" placeholder="ID" clearable id="input_id"/>
       </el-form-item>
       <el-form-item label="编码">
         <el-input v-model="form.code" placeholder="编码" clearable />
@@ -25,6 +27,7 @@
       border
       fit
       highlight-current-row
+      @cell-dblclick="handleUpdateNamespace"
     >
       <el-table-column type="selection" width="55"> </el-table-column>
       <el-table-column align="center" label="ID" width="200" fixed="left">
@@ -43,9 +46,9 @@
         </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
-        <template>
-          <el-button type="text" size="small">查看</el-button>
-          <el-button type="text" size="small">编辑</el-button>
+        <template slot-scope="scope">
+          <el-button type="text" size="small" @click="handleDetailNamespace(scope.row)">查看</el-button>
+          <el-button type="text" size="small" @click="handleUpdateNamespace(scope.row)">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -61,29 +64,34 @@
       >
       </el-pagination>
     </div>
-    <create-namespace-dialog :visible.sync="dialogFormVisible"
-      @refreshList="onSubmit" ></create-namespace-dialog>
+    <handle-namespace-dialog
+      :visible.sync="dialogFormVisible"
+      :form="select_data"
+      :dialog_type.sync="dialog_type"
+      @refreshList="onSubmit"
+    ></handle-namespace-dialog>
   </div>
 </template>
 
 <script>
-import { getNamespaceList, createNamespace } from "@/api/namespace";
-import CreateNamespaceDialog from "./create_dialog";
+import { getNamespaceList } from "@/api/namespace";
+import HandleNamespaceDialog from "./handle-dialog";
 
 export default {
   components: {
-    CreateNamespaceDialog,
+    HandleNamespaceDialog,
   },
-  filters: {
-  },
+  filters: {},
   data() {
     return {
       list: null,
       listLoading: true,
       form: {},
+      select_data: {},
       pageIndex: 1,
       pageSize: 10,
       dialogFormVisible: false,
+      dialog_type: "",
       formLabelWidth: "120px",
       dataTotal: 0,
     };
@@ -94,17 +102,16 @@ export default {
   methods: {
     currentPageInfo() {
       return {
-        "page_size": this.pageSize,
-        "page_index": this.pageIndex,
-      }
+        page_size: this.pageSize,
+        page_index: this.pageIndex,
+      };
     },
-    fetchData(params={}) {
+    fetchData(params = {}) {
       for (var key in this.form) {
         if (this.form[key]) {
-          params[key] = this.form[key]
+          params[key] = this.form[key];
         }
       }
-      this.$message.success(JSON.stringify(params));
       this.listLoading = true;
       getNamespaceList(params).then((response) => {
         this.list = response.data;
@@ -115,23 +122,6 @@ export default {
     onSubmit() {
       this.fetchData(this.currentPageInfo());
     },
-    onSubmitWithCreate() {
-      createNamespace(this.create_form).then((response) => {
-        if (response.code === 0) {
-          this.$message({
-            message: "创建成功!",
-            type: "success",
-          });
-          this.dialogFormVisible = false;
-          this.fetchData();
-        } else {
-          this.$message({
-            message: "创建失败!",
-            type: "error",
-          });
-        }
-      });
-    },
     handleSizeChange(currentSize) {
       let pageInfo = this.currentPageInfo();
       pageInfo["page_size"] = currentSize;
@@ -141,6 +131,23 @@ export default {
       let pageInfo = this.currentPageInfo();
       pageInfo["page_index"] = currentIndex;
       this.fetchData(pageInfo);
+    },
+    handleUpdateNamespace(row) {
+      this.select_data = row;
+      this.dialog_type = "update";
+      console.log("fuck"+this.dialog_type)
+      this.dialogFormVisible = true;
+    },
+    handleCreateNamespace() {
+      this.select_data = {};
+      this.dialog_type = "create";
+      this.dialogFormVisible = true;
+    },
+    handleDetailNamespace(row) {
+      console.log(row);
+      this.select_data = row;
+      this.dialog_type = "detail";
+      this.dialogFormVisible = true;
     },
   },
 };
