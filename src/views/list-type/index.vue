@@ -7,11 +7,15 @@
     </div>
     <el-form ref="form" :model="form" :inline="true">
       <el-form-item label="ID">
-        <el-input v-model="form.id" placeholder="ID" clearable/>
+        <el-input v-model="form.id" placeholder="ID" clearable />
       </el-form-item>
       <el-form-item label="命名空间">
         <el-select v-model="form.namespace" placeholder="请选择命名空间">
-          <el-option label="查询所有命名空间" value="" style="color: red;"></el-option>
+          <el-option
+            label="查询所有命名空间"
+            value=""
+            style="color: red"
+          ></el-option>
           <el-option
             v-for="code in namespaceCodeList"
             :key="code"
@@ -27,8 +31,8 @@
       <el-form-item label="是否生效">
         <el-select v-model="form.is_valid" placeholder="请选择是否生效">
           <el-option label="全部" value=""></el-option>
-          <el-option label="生效" value="true" ></el-option>
-          <el-option label="失效" value="false" ></el-option>
+          <el-option label="生效" value="true"></el-option>
+          <el-option label="失效" value="false"></el-option>
         </el-select>
       </el-form-item>
 
@@ -38,7 +42,11 @@
 
       <el-button-group>
         <el-button type="primary" @click="onSubmit">查询</el-button>
-        <el-button type="danger" icon="el-icon-delete" @click="handleDeleteListType"></el-button>
+        <el-button
+          type="danger"
+          icon="el-icon-delete"
+          @click="handleDeleteListType"
+        ></el-button>
       </el-button-group>
     </el-form>
     <el-table
@@ -90,7 +98,12 @@
 
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="handleUpdateListType(scope.row)">编辑</el-button>
+          <el-button
+            type="text"
+            size="small"
+            @click="handleUpdateListType(scope.row)"
+            >编辑</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -119,13 +132,13 @@
 
 <script>
 import { deleteListType, getListTypes } from "@/api/list-type";
-import {getNamespaceCodeList} from '@/api/namespace';
-import OperatorListTypeDialog from './handle-dialog'
+import { getNamespaceCodeList } from "@/api/namespace";
+import OperatorListTypeDialog from "./handle-dialog";
 import _ from "lodash";
 
 export default {
   components: {
-    OperatorListTypeDialog
+    OperatorListTypeDialog,
   },
   filters: {
     statusFilter(status) {
@@ -144,7 +157,9 @@ export default {
       tableTotal: 0,
       pageSize: 10,
       pageIndex: 1,
-      form: {},
+      form: {
+        namespace: "",
+      },
       dialogFormVisible: false,
       formLabelWidth: "120px",
       namespaceCodeList: [],
@@ -153,17 +168,19 @@ export default {
       selectData: {},
     };
   },
-  created() {
+  async created() {
     this.fetchData();
-    this.namespaceCodeList = getNamespaceCodeList({page_size:0});
-    console.log(this.namespaceCodeList)
+    this.namespaceCodeList = await getNamespaceCodeList({ page_size: 0 });
+    if (this.namespaceCodeList.length > 0) {
+      this.form.namespace = this.namespaceCodeList[0];
+    }
   },
   methods: {
     fetchData() {
       let params = {
         page_index: this.pageIndex,
-        page_size: this.pageSize
-      }
+        page_size: this.pageSize,
+      };
       for (let k in this.form) {
         let v = this.form[k];
         if (v) {
@@ -198,12 +215,12 @@ export default {
     },
     handleUpdateListType(row) {
       this.selectData = JSON.parse(JSON.stringify(row));
-      this.selectData.is_valid = this.selectData.is_valid.toString()
+      this.selectData.is_valid = this.selectData.is_valid.toString();
       this.dialogType = "update";
       this.dialogFormVisible = true;
     },
     handleSelectChange(selectedRowList) {
-      this.selectedRowList = selectedRowList
+      this.selectedRowList = selectedRowList;
     },
     closeDialog() {
       this.dialogFormVisible = false;
@@ -218,7 +235,7 @@ export default {
         });
       }
       this.fetchData();
-    }
+    },
   },
 };
 </script>

@@ -9,9 +9,9 @@ export function getNamespaceList(params) {
   })
 }
 
-export function getNamespaceCodeList(params) {
+export async function getNamespaceCodeList(params) {
   let namespace_code_list = [];
-  request({
+  await request({
     url: '/name-list/namespace/',
     method: 'get',
     params
