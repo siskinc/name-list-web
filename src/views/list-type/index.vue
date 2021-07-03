@@ -38,7 +38,7 @@
 
       <el-button-group>
         <el-button type="primary" @click="onSubmit">查询</el-button>
-        <el-button type="danger" icon="el-icon-delete"></el-button>
+        <el-button type="danger" icon="el-icon-delete" @click="handleDeleteListType"></el-button>
       </el-button-group>
     </el-form>
     <el-table
@@ -118,7 +118,7 @@
 </template>
 
 <script>
-import { getListTypes } from "@/api/list-type";
+import { deleteListType, getListTypes } from "@/api/list-type";
 import {getNamespaceCodeList} from '@/api/namespace';
 import OperatorListTypeDialog from './handle-dialog'
 import _ from "lodash";
@@ -207,6 +207,17 @@ export default {
     },
     closeDialog() {
       this.dialogFormVisible = false;
+    },
+    async handleDeleteListType() {
+      for (let index = 0; index < this.selectedRowList.length; index++) {
+        const element = this.selectedRowList[index];
+        await deleteListType(element.id).then((response) => {
+          if (response.code === 0) {
+            this.$message.success(`删除${element.code}名单类型成功!`);
+          }
+        });
+      }
+      this.fetchData();
     }
   },
 };
