@@ -1,9 +1,6 @@
 <template>
   <div class="app-container">
-    <el-button
-      type="primary"
-      @click="handleDialogFormVisible = !handleDialogFormVisible"
-    >
+    <el-button type="primary" @click="handleCreateListItem">
       新增名单项
     </el-button>
     <el-form ref="form" :model="form" :inline="true">
@@ -57,7 +54,7 @@
       border
       fit
       highlight-current-row
-      @cell-dblclick="handleUpdateListType"
+      @cell-dblclick="handleUpdateListItem"
       @selection-change="handleSelectChange"
     >
       <el-table-column type="selection" width="55"> </el-table-column>
@@ -81,7 +78,7 @@
 
       <el-table-column
         align="center"
-        :label="'字段['+item+']'"
+        :label="'字段[' + item + ']'"
         width="200"
         v-for="item in fieldNameList"
         :key="item"
@@ -128,6 +125,7 @@
       :namespaceCodeList.sync="namespaceCodeList"
       :listTypeCodeList.sync="listTypeCodeList"
       :form="selectData"
+      :dialogType.sync="dialogType"
       @closeDialog="handleDialogFormVisible = false"
       @refreshTable="onSubmit"
     />
@@ -170,6 +168,9 @@ export default {
       formLabelWidth: "120px",
       namespaceCodeList: [],
       listTypeCodeList: [],
+      listTypeMap: {},
+      fieldNameList: [],
+      dialogType: "create",
     };
   },
   async created() {
@@ -189,14 +190,15 @@ export default {
   methods: {
     newSelectData() {
       return {
-        "namespace": "",
-        "code": ""
-      }
+        namespace: "",
+        code: "",
+      };
     },
     convertData(data) {
       data.fieldValueMap = {};
-      for (let k in data.multi_value) {
-        data.fieldValueMap[k] = data.multi_value[k];
+      for (const i in data.multi_value ) {
+        let element = data.multi_value[i];
+        data.fieldValueMap[element.key] = element.value;
       }
       data.is_valid_str = data.is_valid ? "生效" : "失效";
     },
@@ -215,6 +217,7 @@ export default {
               this.convertData(element);
             }
           }
+          console.log(`this.list: ${JSON.stringify(this.list)}`);
           this.tableTotal = response.total;
           this.listLoading = false;
         }
@@ -229,19 +232,54 @@ export default {
     handleCurrentChange() {
       this.fetchData();
     },
+    handleCreateListItem() {
+      this.dialogType = "create";
+      this.handleDialogFormVisible = true;
+    },
+    handleUpdateListItem(row) {
+      this.selectData = JSON.parse(JSON.stringify(row));
+      this.dialogType = "update";
+      this.handleDialogFormVisible = true;
+    },
+    handleSelectChange(selectedRowList) {
+      this.selectedRowList = selectedRowList;
+    },
   },
-  computed: {
-    fieldNameList: {
-      get() {
-        getListTypes({code: this.form.code}).then(response => {
-          let listType = response.data[0];
-          if (listType) {
-            return listType.fields;
-          }
-        });
-        return [];
+  watch: {
+    "form.namespace": async function () {
+      this.form.code = "";
+      this.listTypeCodeList = [];
+      let req = { namespace: this.form.namespace };
+      await getListTypes(req).then((response) => {
+        let data = response.data;
+        if (data == null) {
+          return;
+        }
+        this.listTypeMap = {};
+        for (let index = 0; index < data.length; index++) {
+          const element = data[index];
+          this.listTypeMap[element.code] = element;
+          this.listTypeCodeList.push(element.code);
+        }
+      });
+      console.log(
+        `this.listTypeCodeList: ${JSON.stringify(this.listTypeCodeList)}`
+      );
+      if (this.listTypeCodeList != null && this.listTypeCodeList.length > 0) {
+        this.form.code = this.listTypeCodeList[0];
       }
-    }
-  }
+    },
+    "form.code": function () {
+      if (this.form.code == "") {
+        return;
+      }
+      if (this.listTypeMap[this.form.code] != null) {
+        this.fieldNameList = this.listTypeMap[this.form.code].fields;
+      } else {
+        this.fieldNameList = [];
+      }
+      this.onSubmit();
+    },
+  },
 };
 </script>
