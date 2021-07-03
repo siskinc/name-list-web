@@ -8,7 +8,16 @@ export function getListTypes(params) {
   })
 }
 
+export function createListType(data) {
+  return request({
+    url: `/name-list/type/`,
+    method: 'post',
+    data: data,
+  })
+}
+
 export function updateListType(id, data) {
+  // console.log(`update data: ${JSON.stringify(data)}`);
   return request({
     url: `/name-list/type/${id}`,
     method: 'patch',

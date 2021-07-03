@@ -2,7 +2,11 @@
   <el-dialog :title="title" :visible.sync="dialogFormVisible">
     <el-form :model="form">
       <el-form-item label="ID" :label-width="formLabelWidth" v-show="show.id">
-        <el-input v-model="form.id" autocomplete="off" :disabled="disabled.id"></el-input>
+        <el-input
+          v-model="form.id"
+          autocomplete="off"
+          :disabled="disabled.id"
+        ></el-input>
       </el-form-item>
       <el-form-item label="命名空间" :label-width="formLabelWidth">
         <el-select
@@ -61,14 +65,14 @@
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="dialogFormVisible = false">取 消</el-button>
-      <el-button type="primary" @click="dialogFormVisible = false">
-        确 定
-      </el-button>
+      <el-button type="primary" @click="onSubmit"> 确 定 </el-button>
     </div>
   </el-dialog>
 </template>
 
 <script>
+import { createListType, updateListType } from "@/api/list-type";
+import _ from 'lodash';
 export default {
   data() {
     return {
@@ -132,6 +136,41 @@ export default {
           label: element,
         });
       });
+    },
+    convertData(data) {
+      let newData = _.clone(data);
+      newData.is_valid = newData.is_valid === "true";
+      return newData;
+    },
+    handleCreateListType(data) {
+      createListType(data).then((response) => {
+        if (response.code === 0) {
+          this.$message.success("创建成功!");
+        }
+      });
+    },
+    handleUpdateListType(data) {
+      updateListType(data.id, data).then((response) => {
+        if (response.code === 0) {
+          this.$message.success("更新成功!");
+        }
+      });
+    },
+    onSubmit() {
+      let data = this.convertData(this.form);
+      // console.log(`data: ${JSON.stringify(data)}`)
+      switch (this.dialogType) {
+        case "create":
+          this.handleCreateListType(data);
+          break;
+        case "update":
+          this.handleUpdateListType(data);
+          break;
+        default:
+          break;
+      }
+      this.$emit("refreshTable");
+      this.dialogFormVisible = false;
     },
   },
   watch: {

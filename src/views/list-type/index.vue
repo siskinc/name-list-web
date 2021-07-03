@@ -112,6 +112,7 @@
       :dialogType.sync="dialogType"
       :visible.sync="dialogFormVisible"
       @closeDialog="closeDialog"
+      @refreshTable="onSubmit"
     />
   </div>
 </template>
