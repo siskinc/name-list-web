@@ -143,16 +143,17 @@ export default {
       this.dialog_type = "create";
       this.dialogFormVisible = true;
     },
-    handleDeleteNamespace() {
+    async handleDeleteNamespace() {
       for (let i in this.selected_rows) {
         let _id = this.selected_rows[i].id;
         let code = this.selected_rows[i].code;
-        deleteNamespace(_id).then((response)=>{
+        await deleteNamespace(_id).then((response)=>{
           if (response.code === 0) {
-            this.$message.success(`删除 "${code}" 成功`)
+            this.$message.success(`删除 "${code}" 命名空间成功`)
           }
         });
       }
+      this.fetchData()
     },
     handleSelectChange(selected_rows) {
       this.selected_rows = selected_rows;

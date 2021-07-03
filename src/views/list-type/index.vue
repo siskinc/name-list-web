@@ -213,7 +213,7 @@ export default {
         const element = this.selectedRowList[index];
         await deleteListType(element.id).then((response) => {
           if (response.code === 0) {
-            this.$message.success(`删除${element.code}名单类型成功!`);
+            this.$message.success(`删除 ${element.code} 名单类型成功!`);
           }
         });
       }
