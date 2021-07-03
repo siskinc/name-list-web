@@ -1,21 +1,35 @@
 <template>
   <div class="app-container">
-    <el-form ref="form" :model="form" label-width="100px" :inline="true">
-      <el-button type="primary" @click="dialogFormVisible = !dialogFormVisible"
-        >新增名单类型</el-button
-      >
+    <div>
+      <el-button type="primary" @click="handleCreateListType">
+        新增名单类型
+      </el-button>
+    </div>
+    <el-form ref="form" :model="form" :inline="true">
       <el-form-item label="ID">
-        <el-input v-model="form.id" placeholder="ID" clearable id="input_id" />
+        <el-input v-model="form.id" placeholder="ID" clearable/>
       </el-form-item>
       <el-form-item label="命名空间">
-        <el-input v-model="form.namespace" placeholder="命名空间" clearable />
+        <el-select v-model="form.namespace" placeholder="请选择命名空间">
+          <el-option label="查询所有命名空间" value="" style="color: red;"></el-option>
+          <el-option
+            v-for="code in namespaceCodeList"
+            :key="code"
+            :label="code"
+            :value="code"
+          ></el-option>
+        </el-select>
       </el-form-item>
-      <el-form-item label="名单类型编码">
-        <el-input v-model="form.code" placeholder="名单类型编码" clearable />
+      <el-form-item label="编码">
+        <el-input v-model="form.code" placeholder="编码" clearable />
       </el-form-item>
 
       <el-form-item label="是否生效">
-        <el-input v-model="form.is_valid" placeholder="是否生效" clearable />
+        <el-select v-model="form.is_valid" placeholder="请选择是否生效">
+          <el-option label="全部" value=""></el-option>
+          <el-option label="生效" value="true" ></el-option>
+          <el-option label="失效" value="false" ></el-option>
+        </el-select>
       </el-form-item>
 
       <el-form-item label="描述">
@@ -34,9 +48,11 @@
       border
       fit
       highlight-current-row
+      @cell-dblclick="handleUpdateListType"
+      @selection-change="handleSelectChange"
     >
       <el-table-column type="selection" width="55"> </el-table-column>
-      <el-table-column align="center" label="ID" width="200" fixed="left">
+      <el-table-column align="center" label="ID" width="210" fixed="left">
         <template slot-scope="scope">
           {{ scope.row.id }}
         </template>
@@ -56,13 +72,13 @@
 
       <el-table-column align="center" label="字段列表" width="200">
         <template slot-scope="scope">
-          {{ scope.row.fields }}
+          {{ scope.row.fields_str }}
         </template>
       </el-table-column>
 
       <el-table-column align="center" label="是否生效" width="200">
         <template slot-scope="scope">
-          {{ scope.row.is_valid }}
+          {{ scope.row.is_valid_str }}
         </template>
       </el-table-column>
 
@@ -73,9 +89,8 @@
       </el-table-column>
 
       <el-table-column fixed="right" label="操作" width="100">
-        <template>
-          <el-button type="text" size="small">查看</el-button>
-          <el-button type="text" size="small">编辑</el-button>
+        <template slot-scope="scope">
+          <el-button type="text" size="small" @click="handleUpdateListType(scope.row)">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -83,53 +98,34 @@
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="currentPage4"
+        :current-page="pageIndex"
         :page-sizes="[10, 20, 30, 40, 50, 60, 70, 80, 90, 100]"
-        :page-size="10"
+        :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="400"
+        :total="tableTotal"
       >
       </el-pagination>
     </div>
-
-    <el-dialog
-      title="创建新的命名空间"
+    <operator-list-type-dialog
+      :namespaceCodeList="namespaceCodeList"
+      :form.sync="selectData"
+      :dialogType.sync="dialogType"
       :visible.sync="dialogFormVisible"
-      center="true"
-    >
-      <el-form :model="create_form">
-        <el-form-item label="命名空间" :label-width="formLabelWidth">
-          <el-input v-model="create_form.namesapce" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="编码" :label-width="formLabelWidth">
-          <el-input v-model="create_form.code" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="字段列表" :label-width="formLabelWidth">
-          <el-input v-model="create_form.fields" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="描述" :label-width="formLabelWidth">
-          <el-input
-            type="textarea"
-            v-model="create_form.description"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false"
-          >确 定</el-button
-        >
-      </div>
-    </el-dialog>
+      @closeDialog="closeDialog"
+    />
   </div>
 </template>
 
 <script>
 import { getListTypes } from "@/api/list-type";
+import {getNamespaceCodeList} from '@/api/namespace';
+import OperatorListTypeDialog from './handle-dialog'
+import _ from "lodash";
 
 export default {
-  components: {},
+  components: {
+    OperatorListTypeDialog
+  },
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -144,26 +140,44 @@ export default {
     return {
       list: null,
       listLoading: true,
+      tableTotal: 0,
+      pageSize: 10,
+      pageIndex: 1,
       form: {},
-      currentPage4: 1,
       dialogFormVisible: false,
-      create_form: {
-        namespace: "",
-        fields: "",
-        code: "",
-        description: "",
-      },
       formLabelWidth: "120px",
+      namespaceCodeList: [],
+      dialogType: "create",
+      selectedRowList: [],
+      selectData: {},
     };
   },
   created() {
     this.fetchData();
+    this.namespaceCodeList = getNamespaceCodeList({page_size:0});
+    console.log(this.namespaceCodeList)
   },
   methods: {
     fetchData() {
+      let params = {
+        page_index: this.pageIndex,
+        page_size: this.pageSize
+      }
+      for (let k in this.form) {
+        let v = this.form[k];
+        if (v) {
+          params[k] = v;
+        }
+      }
       this.listLoading = true;
-      getListTypes().then((response) => {
-        this.list = response.data.items;
+      console.log(`params: ${JSON.stringify(params)}`);
+      getListTypes(params).then((response) => {
+        _.forEach(response.data, function (val) {
+          val.fields_str = _.join(val.fields, ",");
+          val.is_valid_str = val.is_valid ? "生效" : "失效";
+        });
+        this.list = response.data;
+        this.tableTotal = response.total;
         this.listLoading = false;
       });
     },
@@ -176,6 +190,23 @@ export default {
     handleCurrentChange() {
       this.fetchData();
     },
+    handleCreateListType() {
+      this.selectData = {};
+      this.dialogType = "create";
+      this.dialogFormVisible = true;
+    },
+    handleUpdateListType(row) {
+      this.selectData = JSON.parse(JSON.stringify(row));
+      this.selectData.is_valid = this.selectData.is_valid.toString()
+      this.dialogType = "update";
+      this.dialogFormVisible = true;
+    },
+    handleSelectChange(selectedRowList) {
+      this.selectedRowList = selectedRowList
+    },
+    closeDialog() {
+      this.dialogFormVisible = false;
+    }
   },
 };
 </script>

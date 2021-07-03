@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import { _ } from 'lodash';
 
 export function getNamespaceList(params) {
   return request({
@@ -6,6 +7,20 @@ export function getNamespaceList(params) {
     method: 'get',
     params
   })
+}
+
+export function getNamespaceCodeList(params) {
+  let namespace_code_list = [];
+  request({
+    url: '/name-list/namespace/',
+    method: 'get',
+    params
+  }).then((response) => {
+    response.data.forEach(element => {
+      namespace_code_list.push(element.code);
+    });
+  });
+  return namespace_code_list;
 }
 
 export function createNamespace(data) {
