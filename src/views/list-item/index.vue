@@ -38,10 +38,6 @@
         </el-select>
       </el-form-item>
 
-      <el-form-item label="描述">
-        <el-input v-model="form.description" placeholder="描述" clearable />
-      </el-form-item>
-
       <el-button-group>
         <el-button type="primary" @click="onSubmit">查询</el-button>
         <el-button type="danger" icon="el-icon-delete"></el-button>
@@ -94,9 +90,9 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="描述" align="center">
+      <el-table-column label="业务额外属性" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.description }}</span>
+          <span>{{ JSON.stringify(scope.row.extra) }}</span>
         </template>
       </el-table-column>
 
@@ -121,10 +117,8 @@
     </div>
     <handle-item-dialog
       :visible.sync="handleDialogFormVisible"
-      :fieldNameList.sync="fieldNameList"
       :namespaceCodeList.sync="namespaceCodeList"
-      :listTypeCodeList.sync="listTypeCodeList"
-      :form="selectData"
+      :form.sync="selectData"
       :dialogType.sync="dialogType"
       @closeDialog="handleDialogFormVisible = false"
       @refreshTable="onSubmit"
@@ -154,7 +148,7 @@ export default {
   },
   data() {
     return {
-      list: null,
+      list: [],
       listLoading: true,
       form: {
         namespace: "",
@@ -178,14 +172,6 @@ export default {
     if (this.namespaceCodeList.length > 0) {
       this.form.namespace = this.namespaceCodeList[0];
     }
-    if (this.form.namespace != "") {
-      let params = { namespace: this.form.namespace };
-      this.listTypeCodeList = await getListTypeCodeList(params);
-      if (this.listTypeCodeList.length > 0) {
-        this.form.code = this.listTypeCodeList[0];
-      }
-    }
-    this.fetchData();
   },
   methods: {
     newSelectData() {
@@ -217,7 +203,7 @@ export default {
               this.convertData(element);
             }
           }
-          console.log(`this.list: ${JSON.stringify(this.list)}`);
+          // console.log(`this.list: ${JSON.stringify(this.list)}`);
           this.tableTotal = response.total;
           this.listLoading = false;
         }
@@ -238,6 +224,9 @@ export default {
     },
     handleUpdateListItem(row) {
       this.selectData = JSON.parse(JSON.stringify(row));
+      this.selectData.extra = JSON.stringify(this.selectData.extra);
+      this.selectData.is_valid = this.selectData.is_valid ? "true" : "false"
+      console.log(`select data: ${JSON.stringify(this.selectData)}`);
       this.dialogType = "update";
       this.handleDialogFormVisible = true;
     },
@@ -259,12 +248,12 @@ export default {
         for (let index = 0; index < data.length; index++) {
           const element = data[index];
           this.listTypeMap[element.code] = element;
-          this.listTypeCodeList.push(element.code);
+          this.listTypeCodeList.push(element.code); 
         }
       });
-      console.log(
-        `this.listTypeCodeList: ${JSON.stringify(this.listTypeCodeList)}`
-      );
+      // console.log(
+      //   `this.listTypeCodeList: ${JSON.stringify(this.listTypeCodeList)}`
+      // );
       if (this.listTypeCodeList != null && this.listTypeCodeList.length > 0) {
         this.form.code = this.listTypeCodeList[0];
       }

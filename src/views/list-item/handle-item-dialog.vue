@@ -1,8 +1,19 @@
 <template>
-  <el-dialog title="创建新的命名空间" :visible.sync="dialogFormVisible">
+  <el-dialog
+    title="创建新的命名空间"
+    :visible.sync="dialogFormVisible"
+    :rules="validateRules"
+  >
     <el-form :model="form">
+      <el-form-item label="ID" :label-width="formLabelWidth" v-show="show.id">
+        <el-input
+          v-model="form.id"
+          autocomplete="off"
+          :disabled="disabled.id"
+        ></el-input>
+      </el-form-item>
       <el-form-item label="命名空间" :label-width="formLabelWidth">
-        <el-select v-model="form.namespace" placeholder="请选择命名空间">
+        <el-select v-model="form.namespace" placeholder="请选择命名空间" :disabled="disabled.namespace">
           <el-option
             v-for="code in namespaceCodeList"
             :key="code"
@@ -12,7 +23,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="名单类型编码" :label-width="formLabelWidth">
-        <el-select v-model="form.code" placeholder="请选择名单类型编码">
+        <el-select v-model="form.code" placeholder="请选择名单类型编码" :disabled="disabled.code">
           <el-option
             v-for="code in listTypeCodeList"
             :key="code"
@@ -27,34 +38,36 @@
         v-for="multiValue in multiValues"
         :key="multiValue.field"
       >
-        <el-input v-model="multiValue.value" autocomplete="off"></el-input>
+        <el-input v-model="multiValue.value" autocomplete="off" :disabled="disabled.fields"></el-input>
       </el-form-item>
       <el-form-item label="是否生效" :label-width="formLabelWidth">
         <el-select v-model="form.is_valid" placeholder="请选择是否生效">
-          <el-option label="生效" value=true></el-option>
-          <el-option label="失效" value=false></el-option>
+          <el-option label="生效" value="true"></el-option>
+          <el-option label="失效" value="false"></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="描述" :label-width="formLabelWidth">
+      <el-form-item
+        label="业务额外属性[JSON]"
+        :label-width="formLabelWidth"
+        prop="extra"
+      >
         <el-input
           type="textarea"
-          v-model="form.description"
+          v-model="form.extra"
           autocomplete="off"
         ></el-input>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="dialogFormVisible = false">取 消</el-button>
-      <el-button type="primary" @click="onSubmit">
-        确 定
-      </el-button>
+      <el-button type="primary" @click="onSubmit"> 确 定 </el-button>
     </div>
   </el-dialog>
 </template>
 
 <script>
 import { getListTypes } from "@/api/list-type";
-import { createListItem } from '@/api/list-item';
+import { createListItem, updateListItem } from "@/api/list-item";
 export default {
   props: {
     namespaceCodeList: {
@@ -72,7 +85,7 @@ export default {
     dialogType: {
       type: String,
       default: "create",
-    }
+    },
   },
   data() {
     return {
@@ -89,27 +102,48 @@ export default {
         id: false,
         namespace: false,
         code: false,
-        fields: false
-      }
+        fields: false,
+      },
+      validateRules: {
+        extra: [
+          {
+            require: false,
+            message: "请输入业务额外属性",
+            trigger: "blur",
+            type: "object",
+          },
+        ],
+      },
     };
   },
   methods: {
+    defaultForm() {
+      return {
+        namespace: "",
+        code: "",
+        extra: "{}",
+        is_valid: false,
+        description: "",
+      };
+    },
     dialogChange() {
+      console.log(`this.dialogType: ${this.dialogType}`);
       switch (this.dialogType) {
         case "create":
-          this.form = {
-            namespace: "",
-            code: "",
-            is_valid: false,
-          };
+          this.form = this.defaultForm();
+          this.extra = "{}";
           this.title = "创建新的名单项";
           this.show.id = false;
           this.disabled.id = true;
           this.disabled.namespace = false;
           this.disabled.code = false;
           this.disabled.fields = false;
+          if (this.namespaceCodeList.length > 0) {
+            this.form.namespace = this.namespaceCodeList[0];
+          }
           break;
         case "update":
+          this.multiValues = this.form.multi_value;
           this.title = "修改名单项";
           this.show.id = true;
           this.disabled.id = true;
@@ -131,9 +165,9 @@ export default {
     handleCreateListItem(data) {
       // console.log(data);
       data.values = [];
-      this.multiValues.forEach(element => {
+      this.multiValues.forEach((element) => {
         data.values.push(element.value);
-      })
+      });
       createListItem(data).then((response) => {
         if (response.code === 0) {
           this.$message.success("创建成功!");
@@ -141,7 +175,7 @@ export default {
       });
     },
     handleUpdateListItem(data) {
-      updateListType(data.id, data).then((response) => {
+      updateListItem(data.id, data).then((response) => {
         if (response.code === 0) {
           this.$message.success("更新成功!");
         }
@@ -150,8 +184,10 @@ export default {
     onSubmit() {
       let data = _.clone(this.form);
       data.is_valid = data.is_valid == "true";
-      console.log(`data: ${JSON.stringify(data)}`)
-      console.log(`this.dialogType: ${this.dialogType}`)
+      data.extra = JSON.parse(data.extra);
+      data.multi_value = this.multiValues;
+      // console.log(`data: ${JSON.stringify(data)}`);
+      // console.log(`this.dialogType: ${this.dialogType}`);
       switch (this.dialogType) {
         case "create":
           this.handleCreateListItem(data);
@@ -186,6 +222,9 @@ export default {
   },
   watch: {
     "form.namespace": async function () {
+      if (this.form.namespace == "") {
+        return;
+      }
       this.form.code = "";
       this.listTypeCodeList = [];
       let req = { namespace: this.form.namespace };
@@ -201,9 +240,9 @@ export default {
           this.listTypeCodeList.push(element.code);
         }
       });
-      console.log(
-        `this.listTypeCodeList: ${JSON.stringify(this.listTypeCodeList)}`
-      );
+      // console.log(
+      //   `this.listTypeCodeList: ${JSON.stringify(this.listTypeCodeList)}`
+      // );
       if (this.listTypeCodeList != null && this.listTypeCodeList.length > 0) {
         this.form.code = this.listTypeCodeList[0];
       }
@@ -221,6 +260,9 @@ export default {
       } else {
         this.fieldNameList = [];
       }
+    },
+    visible: function () {
+      this.dialogChange();
     },
   },
 };
