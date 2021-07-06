@@ -66,7 +66,7 @@ export default {
         data.namespace = this.namespace;
         hitAllListItem(data).then((response) => {
           let hit_list_item_list = response.data.hit_list_item_list;
-          if (hit_list_item_list.length < 0) {
+          if (hit_list_item_list == null || hit_list_item_list.length < 0) {
             this.$message.warning("无命中");
           } else {
             for (let i = 0; i < hit_list_item_list.length; i++) {

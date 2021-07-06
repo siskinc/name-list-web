@@ -119,12 +119,16 @@
       >
       </el-pagination>
     </div>
-    <handle-item-dialog
-      :visible.sync="handleDialogFormVisible"
+    <create-item-dialog
+      :visible.sync="createDialogFormVisible"
       :namespaceCodeList.sync="namespaceCodeList"
-      :form.sync="selectData"
-      :dialogType.sync="dialogType"
-      @closeDialog="handleDialogFormVisible = false"
+      @closeDialog="createDialogFormVisible = false"
+      @refreshTable="onSubmit"
+    />
+    <update-item-dialog
+      :visible.sync="updateDialogFormVisible"
+      :selectData.sync="selectData"
+      @closeDialog="updateDialogFormVisible = false"
       @refreshTable="onSubmit"
     />
     <hit-item-dialog
@@ -137,7 +141,8 @@
 </template>
 
 <script>
-import HandleItemDialog from "./handle-item-dialog";
+import CreateItemDialog from "./create-item-dialog";
+import UpdateItemDialog from "./update-item-dialog";
 import HitItemDialog from "./handle-hit-dialog";
 import { getListTypes } from "@/api/list-type";
 import { getNamespaceCodeList } from "@/api/namespace";
@@ -145,7 +150,8 @@ import { getListItems } from "@/api/list-item";
 
 export default {
   components: {
-    HandleItemDialog,
+    CreateItemDialog,
+    UpdateItemDialog,
     HitItemDialog,
   },
   filters: {
@@ -170,14 +176,14 @@ export default {
       pageIndex: 1,
       pageSize: 10,
       tableTotal: 0,
-      handleDialogFormVisible: false,
+      createDialogFormVisible: false,
+      updateDialogFormVisible: false,
       hitDialogFromVisible: false,
       formLabelWidth: "120px",
       namespaceCodeList: [],
       listTypeCodeList: [],
       listTypeMap: {},
       fieldNameList: [],
-      dialogType: "create",
       hitInfo: {
         id: "",
         namespace: ""
@@ -236,16 +242,11 @@ export default {
       this.fetchData();
     },
     handleCreateListItem() {
-      this.dialogType = "create";
-      this.handleDialogFormVisible = true;
+      this.createDialogFormVisible = true;
     },
     handleUpdateListItem(row) {
       this.selectData = JSON.parse(JSON.stringify(row));
-      this.selectData.extra = JSON.stringify(this.selectData.extra);
-      this.selectData.is_valid = this.selectData.is_valid ? "true" : "false";
-      console.log(`select data: ${JSON.stringify(this.selectData)}`);
-      this.dialogType = "update";
-      this.handleDialogFormVisible = true;
+      this.updateDialogFormVisible = true;
     },
     handleSelectChange(selectedRowList) {
       this.selectedRowList = selectedRowList;

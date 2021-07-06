@@ -1,10 +1,13 @@
 import request from '@/utils/request'
+import {clearObj} from '@/utils/map';
 
 export function getListItems(params) {
+    params = _.clone(params);
+    params = clearObj(params);
     return request({
         url: '/name-list/item/',
         method: 'get',
-        params
+        params: params,
     })
 }
 

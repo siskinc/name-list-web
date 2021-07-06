@@ -5,15 +5,8 @@
     :rules="validateRules"
   >
     <el-form :model="form">
-      <el-form-item label="ID" :label-width="formLabelWidth" v-show="show.id">
-        <el-input
-          v-model="form.id"
-          autocomplete="off"
-          :disabled="disabled.id"
-        ></el-input>
-      </el-form-item>
       <el-form-item label="命名空间" :label-width="formLabelWidth">
-        <el-select v-model="form.namespace" placeholder="请选择命名空间" :disabled="disabled.namespace">
+        <el-select v-model="form.namespace" placeholder="请选择命名空间">
           <el-option
             v-for="code in namespaceCodeList"
             :key="code"
@@ -23,7 +16,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="名单类型编码" :label-width="formLabelWidth">
-        <el-select v-model="form.code" placeholder="请选择名单类型编码" :disabled="disabled.code">
+        <el-select v-model="form.code" placeholder="请选择名单类型编码">
           <el-option
             v-for="code in listTypeCodeList"
             :key="code"
@@ -35,10 +28,10 @@
       <el-form-item
         :label="'字段[' + multiValue.field + ']'"
         :label-width="formLabelWidth"
-        v-for="multiValue in multiValues"
+        v-for="multiValue in form.multi_value"
         :key="multiValue.field"
       >
-        <el-input v-model="multiValue.value" autocomplete="off" :disabled="disabled.fields"></el-input>
+        <el-input v-model="multiValue.value" autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item label="是否生效" :label-width="formLabelWidth">
         <el-select v-model="form.is_valid" placeholder="请选择是否生效">
@@ -67,24 +60,16 @@
 
 <script>
 import { getListTypes } from "@/api/list-type";
-import { createListItem, updateListItem } from "@/api/list-item";
+import { createListItem } from "@/api/list-item";
 export default {
   props: {
     namespaceCodeList: {
       type: Array,
-      default: [],
+      default: null,
     },
     visible: {
       type: Boolean,
       default: false,
-    },
-    form: {
-      type: Object,
-      default: {},
-    },
-    dialogType: {
-      type: String,
-      default: "create",
     },
   },
   data() {
@@ -94,16 +79,6 @@ export default {
       listTypeCodeList: [],
       fieldNameList: [],
       multiValues: [],
-      title: "",
-      show: {
-        id: false,
-      },
-      disabled: {
-        id: false,
-        namespace: false,
-        code: false,
-        fields: false,
-      },
       validateRules: {
         extra: [
           {
@@ -114,58 +89,32 @@ export default {
           },
         ],
       },
+      form: this.initForm(),
     };
   },
   methods: {
-    defaultForm() {
+    initForm() {
       return {
         namespace: "",
         code: "",
         extra: "{}",
-        is_valid: false,
-        description: "",
+        is_valid: "false",
+        multi_value: [],
       };
     },
     dialogChange() {
-      console.log(`this.dialogType: ${this.dialogType}`);
-      switch (this.dialogType) {
-        case "create":
-          this.form = this.defaultForm();
-          this.extra = "{}";
-          this.title = "创建新的名单项";
-          this.show.id = false;
-          this.disabled.id = true;
-          this.disabled.namespace = false;
-          this.disabled.code = false;
-          this.disabled.fields = false;
-          if (this.namespaceCodeList.length > 0) {
-            this.form.namespace = this.namespaceCodeList[0];
-          }
-          break;
-        case "update":
-          this.multiValues = this.form.multi_value;
-          this.title = "修改名单项";
-          this.show.id = true;
-          this.disabled.id = true;
-          this.disabled.namespace = true;
-          this.disabled.code = true;
-          this.disabled.fields = true;
-        default:
-          break;
+      this.form = this.initForm();
+      if (
+        (this.form.namespace == undefined || this.form.namespace == "") &&
+        this.namespaceCodeList != null &&
+        this.namespaceCodeList.length > 0
+      ) {
+        this.form.namespace = this.namespaceCodeList[0];
       }
     },
-    initData() {
-      this.form.fields.forEach((element) => {
-        this.fieldInfoList.push({
-          value: element,
-          label: element,
-        });
-      });
-    },
     handleCreateListItem(data) {
-      // console.log(data);
       data.values = [];
-      this.multiValues.forEach((element) => {
+      this.form.multi_value.forEach((element) => {
         data.values.push(element.value);
       });
       createListItem(data).then((response) => {
@@ -174,42 +123,16 @@ export default {
         }
       });
     },
-    handleUpdateListItem(data) {
-      updateListItem(data.id, data).then((response) => {
-        if (response.code === 0) {
-          this.$message.success("更新成功!");
-        }
-      });
-    },
     onSubmit() {
       let data = _.clone(this.form);
       data.is_valid = data.is_valid == "true";
       data.extra = JSON.parse(data.extra);
-      data.multi_value = this.multiValues;
-      // console.log(`data: ${JSON.stringify(data)}`);
-      // console.log(`this.dialogType: ${this.dialogType}`);
-      switch (this.dialogType) {
-        case "create":
-          this.handleCreateListItem(data);
-          break;
-        case "update":
-          this.handleUpdateListItem(data);
-          break;
-        default:
-          break;
-      }
+      this.handleCreateListItem(data);
       this.$emit("refreshTable");
       this.dialogFormVisible = false;
     },
   },
-  watch: {
-    dialogType() {
-      this.dialogChange();
-    },
-  },
-  created() {
-    this.dialogChange();
-  },
+  created() {},
   computed: {
     dialogFormVisible: {
       get: function () {
@@ -240,22 +163,19 @@ export default {
           this.listTypeCodeList.push(element.code);
         }
       });
-      // console.log(
-      //   `this.listTypeCodeList: ${JSON.stringify(this.listTypeCodeList)}`
-      // );
       if (this.listTypeCodeList != null && this.listTypeCodeList.length > 0) {
         this.form.code = this.listTypeCodeList[0];
       }
     },
     "form.code": function () {
-      this.multiValues = [];
-      if (this.form.code == "") {
+      if (this.form.code == "" || this.dialogType == "update") {
         return;
       }
       if (this.listTypeMap[this.form.code] != null) {
+        this.form.multi_value = [];
         this.fieldNameList = this.listTypeMap[this.form.code].fields;
         this.fieldNameList.forEach((element) => {
-          this.multiValues.push({ field: element, value: "" });
+          this.form.multi_value.push({ field: element, value: "" });
         });
       } else {
         this.fieldNameList = [];
