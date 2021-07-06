@@ -63,7 +63,7 @@ export const constantRoutes = [
     children: [
       {
         path: "namespace",
-        name: "Namespace",
+        name: "NamespaceDetail",
         component: () => import('@/views/namespace/index'),
         meta: {title: '命名空间', icon: 'el-icon-wallet'}
       }
@@ -77,7 +77,7 @@ export const constantRoutes = [
     children: [
       {
         path:"list-type",
-        name:"ListType",
+        name:"ListTypeDetail",
         component: () => import("@/views/list-type/index"),
         meta: {title:"名单类型", icon: 'el-icon-discount'}
       }
@@ -91,7 +91,7 @@ export const constantRoutes = [
     children: [
       {
         path:"list-item",
-        name:"ListItem",
+        name:"ListItemDetail",
         component: () => import("@/views/list-item/index"),
         meta: {title:"名单项", icon: 'el-icon-price-tag'}
       }
