@@ -3,6 +3,9 @@
     <el-button type="primary" @click="handleCreateListItem">
       新增名单项
     </el-button>
+    <el-button type="primary" @click="handleHitAllItem">
+      名单试算
+    </el-button>
     <el-form ref="form" :model="form" :inline="true">
       <el-form-item label="ID">
         <el-input v-model="form.id" placeholder="ID" clearable id="input_id" />
@@ -97,9 +100,10 @@
       </el-table-column>
 
       <el-table-column fixed="right" label="操作" width="100">
-        <template>
+        <template slot-scope="scope">
           <el-button type="text" size="small">查看</el-button>
           <el-button type="text" size="small">编辑</el-button>
+          <el-button type="text" size="small" @click="handleHitOneItem(scope.row)">预命中</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -123,18 +127,26 @@
       @closeDialog="handleDialogFormVisible = false"
       @refreshTable="onSubmit"
     />
+    <hit-item-dialog
+      :visible.sync="hitDialogFromVisible"
+      :list_item_id.sync="hitInfo.id"
+      :namespace.sync="hitInfo.namespace"
+      @closeDialog="hitDialogFromVisible = false"
+    />
   </div>
 </template>
 
 <script>
 import HandleItemDialog from "./handle-item-dialog";
-import { getListTypeCodeList, getListTypes } from "@/api/list-type";
+import HitItemDialog from "./handle-hit-dialog";
+import { getListTypes } from "@/api/list-type";
 import { getNamespaceCodeList } from "@/api/namespace";
 import { getListItems } from "@/api/list-item";
 
 export default {
   components: {
     HandleItemDialog,
+    HitItemDialog,
   },
   filters: {
     statusFilter(status) {
@@ -159,12 +171,17 @@ export default {
       pageSize: 10,
       tableTotal: 0,
       handleDialogFormVisible: false,
+      hitDialogFromVisible: false,
       formLabelWidth: "120px",
       namespaceCodeList: [],
       listTypeCodeList: [],
       listTypeMap: {},
       fieldNameList: [],
       dialogType: "create",
+      hitInfo: {
+        id: "",
+        namespace: ""
+      }
     };
   },
   async created() {
@@ -182,7 +199,7 @@ export default {
     },
     convertData(data) {
       data.fieldValueMap = {};
-      for (const i in data.multi_value ) {
+      for (const i in data.multi_value) {
         let element = data.multi_value[i];
         data.fieldValueMap[element.key] = element.value;
       }
@@ -225,7 +242,7 @@ export default {
     handleUpdateListItem(row) {
       this.selectData = JSON.parse(JSON.stringify(row));
       this.selectData.extra = JSON.stringify(this.selectData.extra);
-      this.selectData.is_valid = this.selectData.is_valid ? "true" : "false"
+      this.selectData.is_valid = this.selectData.is_valid ? "true" : "false";
       console.log(`select data: ${JSON.stringify(this.selectData)}`);
       this.dialogType = "update";
       this.handleDialogFormVisible = true;
@@ -233,6 +250,17 @@ export default {
     handleSelectChange(selectedRowList) {
       this.selectedRowList = selectedRowList;
     },
+    handleHitAllItem() {
+      this.hitInfo.namespace = this.form.namespace;
+      this.hitInfo.id = "";
+      this.hitDialogFromVisible = true;
+    },
+    handleHitOneItem(item) {
+      console.log(`handleHitOneItem item: ${JSON.stringify(item)}`)
+      this.hitInfo.namespace = "";
+      this.hitInfo.id = item.id;
+      this.hitDialogFromVisible = true;
+    }
   },
   watch: {
     "form.namespace": async function () {
@@ -248,7 +276,7 @@ export default {
         for (let index = 0; index < data.length; index++) {
           const element = data[index];
           this.listTypeMap[element.code] = element;
-          this.listTypeCodeList.push(element.code); 
+          this.listTypeCodeList.push(element.code);
         }
       });
       // console.log(
