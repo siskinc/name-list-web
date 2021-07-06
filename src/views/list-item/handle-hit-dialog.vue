@@ -57,7 +57,7 @@ export default {
         hitOneListItem(data).then((response) => {
           let resp_data = response.data;
           if (resp_data.hit) {
-            this.$message.success(resp_data.resource);
+            this.$message.success("命中名单成功!");
           } else {
             this.$message.warning(resp_data.resource);
           }
